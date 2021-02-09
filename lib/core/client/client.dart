@@ -98,6 +98,7 @@ class ShineyHTTPClient {
   }
   
   Future<ImgResponse> testResponse(String url) async {
+
     List<String> data = [
       "http://image.mangabz.com/1/134/160658/1_5568.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
       "http://image.mangabz.com/1/134/160658/2_1165.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
