@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -5,6 +7,7 @@ import 'package:shiney/core/client/model.dart';
 
 const INDEX_URL = "http://www.mangabz.com/";
 const SEARCH_URL = "http://www.mangabz.com/search";
+const FUN_URL = "http://42846943-1873125947972851.test.functioncompute.com/getImages";
 
 class ShineyHTTPClient {
   Dio _client;
@@ -15,8 +18,6 @@ class ShineyHTTPClient {
       'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
       'Accept': '*/*',
       'Accept-Encoding': 'gzip, deflate',
-      'Host': 'www.mangabz.com',
-      'Referer': 'http://www.mangabz.com/m161207/',
     };
   }
 
@@ -88,17 +89,37 @@ class ShineyHTTPClient {
     return res;
   }
 
-  Future<String> getChapter() async {
-    Response response = await this._client.get('http://www.mangabz.com/m161207-p2/chapterimage.ashx?cid=161207&page=2&key=&_cid=161207&_mid=713&_dt=2021-02-08+08%3A33%3A09&_sign=269dbf9a7e76249514f7459fe1e5b4de');
-    print(response.data);
-    return response.data;
+  Future<ImgResponse> getChapterImages(String url) async {
+    Map<String, dynamic> map = Map();
+    map["url"] = url;
+    Response response = await this._client.get(FUN_URL, queryParameters: map);
+    ImgResponse imgResponse = ImgResponse.fromMap(response.data);
+    return imgResponse;
+  }
+  
+  Future<ImgResponse> testResponse(String url) async {
+    List<String> data = [
+      "http://image.mangabz.com/1/134/160658/1_5568.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/2_1165.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/3_1630.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/4_1399.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/5_5557.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/6_6752.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/7_9261.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/8_6425.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/9_8322.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/10_5523.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk=",
+      "http://image.mangabz.com/1/134/160658/11_7717.jpg?cid=160658&key=7de7d47fe97e85373e3e8a5c65271e83&uk="
+    ];
+    return ImgResponse(code: 0, data: data, messgae: "null");
   }
 
 }
 
 main(List<String> args) {
   ShineyHTTPClient client = new ShineyHTTPClient();
-  client.getChapter().then((value) => {
-    print(value),
+  client.testResponse('url').then((ImgResponse value) => {
+    print(value.data)
   });
+
 }
