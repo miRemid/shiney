@@ -17,6 +17,7 @@ class MangDetail {
   String latestUpload;
   String latestHref;
   List<MangDetailItem> items;
+  MangDetailInfo info;
 }
 
 class MangDetailItem {
@@ -48,7 +49,7 @@ class ImgResponse{
   ImgResponse({
     @required this.code,
     @required this.data,
-    @required this.messgae,
+    this.messgae,
   });
 
   int code;
@@ -61,8 +62,8 @@ class ImgResponse{
 
   factory ImgResponse.fromMap(Map<String, dynamic> json) => ImgResponse(
     code: json["code"],
-    data: List<String>.from(json["data"].map((x) => x)),
-    messgae: json["messgae"],
+    data: List<String>.from(json["images"].map((x) => x)),
+    messgae: json["error"],
   );
 
   Map<String, dynamic> toMap() => {

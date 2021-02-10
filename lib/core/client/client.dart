@@ -1,13 +1,13 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:shiney/core/client/model.dart';
+import 'package:path/path.dart' as path;
 
-const INDEX_URL = "http://www.mangabz.com/";
+const INDEX_URL = "http://www.mangabz.com";
 const SEARCH_URL = "http://www.mangabz.com/search";
 const FUN_URL = "http://42846943-1873125947972851.test.functioncompute.com/getImages";
+const FUN_URL2 = "http://42923184-1873125947972851.test.functioncompute.com/getImages";
 
 class ShineyHTTPClient {
   Dio _client;
@@ -92,7 +92,7 @@ class ShineyHTTPClient {
   Future<ImgResponse> getChapterImages(String url) async {
     Map<String, dynamic> map = Map();
     map["url"] = url;
-    Response response = await this._client.get(FUN_URL, queryParameters: map);
+    Response response = await this._client.get(FUN_URL2, queryParameters: map);
     ImgResponse imgResponse = ImgResponse.fromMap(response.data);
     return imgResponse;
   }
@@ -115,12 +115,70 @@ class ShineyHTTPClient {
     return ImgResponse(code: 0, data: data, messgae: "null");
   }
 
+  Future<MangDetail> getMangaDetailInfo(String href) async {
+    MangDetail detail = new MangDetail();
+    MangDetailInfo info = new MangDetailInfo();
+    String url = INDEX_URL + href;
+    Response response = await this._client.get(url);
+    Document document = parse(response.data);
+
+    // get info
+    Element detailInfo1 = document.getElementsByClassName("detail-info-1")[0];
+    info.cover = detailInfo1.getElementsByTagName("img")[0].attributes["src"];
+    info.title = detailInfo1.getElementsByClassName("detail-info-title")[0].text.trim();
+    info.stars = detailInfo1.getElementsByClassName("detail-info-stars")[0].getElementsByTagName("span")[0].text.trim();
+    Element tips = detailInfo1.getElementsByClassName("detail-info-tip")[0];
+    List<Element> spans = tips.getElementsByTagName("span");
+    String authorString = spans[0].getElementsByTagName("a")[0].text.trim();
+    info.authors = authorString.split(" ");
+    List<Element> tagItems = tips.getElementsByClassName("item");
+    info.tags = new List();
+    tagItems.forEach((item) => {
+      info.tags.add(item.text.trim())
+    });
+
+    Element detailInfo2 = document.getElementsByClassName("detail-info-2")[0];
+    info.content = detailInfo2.getElementsByClassName("detail-info-content")[0].text.trim();
+    detail.info = info;
+
+    // get list state
+    Element listFormTitle = document.getElementsByClassName("detail-list-form-title")[0];
+    Element latest = listFormTitle.getElementsByClassName('s')[0].getElementsByTagName('a')[0];
+    detail.latestHref = latest.attributes['href'];
+
+    // get list items
+    Element listFormCon = document.getElementsByClassName("detail-list-form-con")[0];
+    List<Element> items = listFormCon.getElementsByClassName("detail-list-form-item");
+    detail.items = new List<MangDetailItem>();
+    items.forEach((element) {
+      MangDetailItem item = new MangDetailItem();
+      item.href = element.attributes['href'];
+      item.text = element.text.replaceAll(' ', '');
+      detail.items.add(item);
+    });
+
+    return detail;
+  }
+
+  Future<MangSearch> getMangSearch(String search) async {
+    MangSearch search = new MangSearch();
+
+    return search;
+  }
 }
 
 main(List<String> args) {
   ShineyHTTPClient client = new ShineyHTTPClient();
-  client.testResponse('url').then((ImgResponse value) => {
-    print(value.data)
+  client.getMangaDetailInfo('/236bz/').then((value) => {
+    print(value.info.tags),
+    print(value.info.authors),
+    print(value.info.content),
+    print(value.state),
+    print(value.latestHref),
+    value.items.forEach((element) {
+      print(element.text);
+    }),
+
   });
 
 }
