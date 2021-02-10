@@ -54,9 +54,6 @@ class HomeContent extends StatelessWidget{
 
     var data = snapshot.data;
     List<Image> listData = (data as List).cast();
-
-    print(listData);
-
     return ListView.builder(
       shrinkWrap: true,
       // physics: NeverScrollableScrollPhysics(),

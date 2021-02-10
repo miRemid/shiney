@@ -14,7 +14,16 @@ class ShineyApp extends StatelessWidget {
     return MaterialApp(
       title: "Shiney",
       home: IndexView(),
-      theme: ThemeData(primarySwatch: Colors.pink),
+      theme: ThemeData(
+        primarySwatch: Colors.pink,
+        appBarTheme: AppBarTheme(
+            color: Colors.transparent,
+            elevation: 0,
+            brightness: Brightness.light
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+        )
+      ),
     );
   }
 }
