@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/client/client.dart';
 
 import 'package:shiney/core/views/index.dart';
+import 'package:shiney/core/router/router.dart' as router;
 
 ShineyHTTPClient client = new ShineyHTTPClient();
 
@@ -24,6 +25,7 @@ class ShineyApp extends StatelessWidget {
         floatingActionButtonTheme: FloatingActionButtonThemeData(
         )
       ),
+      onGenerateRoute: router.generateRoute,
     );
   }
 }
