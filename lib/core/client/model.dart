@@ -36,9 +36,15 @@ class MangDetailInfo {
 }
 
 class MangSearch {
+  int total;
+  List<MangSearchItem> items;
+}
+
+class MangSearchItem {
   String cover;
   String title;
   String chapter;
+  String href;
 }
 
 ImgResponse imgResponseFromJson(String str) => ImgResponse.fromJson(json.decode(str));

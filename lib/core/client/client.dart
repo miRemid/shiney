@@ -12,6 +12,8 @@ const FUN_URL2 = "http://42923184-1873125947972851.test.functioncompute.com/getI
 class ShineyHTTPClient {
   Dio _client;
 
+  final _totalRegexp = new RegExp(r"[^0-9]");
+
   ShineyHTTPClient() {
     this._client = new Dio();
     this._client.options.headers =  {
@@ -160,8 +162,37 @@ class ShineyHTTPClient {
     return detail;
   }
 
-  Future<MangSearch> getMangSearch(String search) async {
+  Future<MangSearch> getMangaSearch(String item, int page) async {
     MangSearch search = new MangSearch();
+    Map<String, dynamic> map = Map();
+    String url = SEARCH_URL + "?title=" + item + "&page=" + page.toString();
+    print(url);
+    Response response = await this._client.get(url);
+    Document document = parse(response.data);
+
+    // 1. get total
+    Element totalElement = document.getElementsByClassName("result-title")[0];
+    String t = totalElement.text.replaceAll(this._totalRegexp, '');
+    search.total = int.parse(t);
+
+    // 2. get items
+    List<Element> mhitems = document.getElementsByClassName('mh-list')[0].getElementsByClassName('mh-item');
+    search.items = new List<MangSearchItem>();
+    mhitems.forEach((element) {
+      MangSearchItem item = new MangSearchItem();
+      // 1. get title
+      Element title = element.getElementsByClassName('title')[0].getElementsByTagName('a')[0];
+      item.title = title.text;
+      item.href = title.attributes['href'];
+
+      // 2. get cover
+      item.cover = element.getElementsByTagName('img')[0].attributes['src'];
+
+      // 3. get latest chapter
+      item.chapter = element.getElementsByClassName('chapter')[0].text.replaceAll(' ', '');
+
+      search.items.add(item);
+    });
 
     return search;
   }
@@ -169,16 +200,15 @@ class ShineyHTTPClient {
 
 main(List<String> args) {
   ShineyHTTPClient client = new ShineyHTTPClient();
-  client.getMangaDetailInfo('/236bz/').then((value) => {
-    print(value.info.tags),
-    print(value.info.authors),
-    print(value.info.content),
-    print(value.state),
-    print(value.latestHref),
+  client.getMangaSearch("尾田荣一郎", 1).then((value) => {
+    print(value.total),
+    print(value.items.length),
     value.items.forEach((element) {
-      print(element.text);
-    }),
-
+      print(element.title);
+      print(element.chapter);
+      print(element.href);
+      print(element.cover);
+    })
   });
 
 }

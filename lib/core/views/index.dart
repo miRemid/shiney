@@ -5,6 +5,7 @@ import 'package:shiney/core/style/size_config.dart';
 import 'package:shiney/core/style/font.dart' as font;
 import 'package:shiney/core/global/global.dart' as global;
 import 'package:shiney/core/views/manga.dart';
+import 'package:shiney/core/views/detail.dart' as detail;
 
 class IndexView extends StatefulWidget {
   IndexView({Key key}) : super(key: key);
@@ -176,6 +177,9 @@ class MangaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context) => detail.DetailView(href: item.href,)));
+      },
       child: SizedBox(
         width: getProportionateScreenWidth(150),
 
