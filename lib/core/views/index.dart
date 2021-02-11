@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:shiney/core/client/model.dart';
@@ -187,7 +188,9 @@ class MangaCard extends StatelessWidget {
             AspectRatio(
               aspectRatio: 1,
               child: Container(
-                child: Image.network(item.cover),
+                child: CachedNetworkImage(
+                  imageUrl: item.cover,
+                )
               )
             ),
             SizedBox(height: 5,),

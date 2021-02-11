@@ -2,12 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:shiney/core/client/model.dart';
-import 'package:path/path.dart' as path;
 
 const INDEX_URL = "http://www.mangabz.com";
 const SEARCH_URL = "http://www.mangabz.com/search";
-const FUN_URL = "http://42846943-1873125947972851.test.functioncompute.com/getImages";
-const FUN_URL2 = "http://42923184-1873125947972851.test.functioncompute.com/getImages";
+const FUN_URL2 = "http://api.zxykm.ltd/getImages";
 
 class ShineyHTTPClient {
   Dio _client;
@@ -91,9 +89,9 @@ class ShineyHTTPClient {
     return res;
   }
 
-  Future<ImgResponse> getChapterImages(String url) async {
+  Future<ImgResponse> getChapterImages(String href) async {
     Map<String, dynamic> map = Map();
-    map["url"] = url;
+    map["url"] = INDEX_URL + href;
     Response response = await this._client.get(FUN_URL2, queryParameters: map);
     ImgResponse imgResponse = ImgResponse.fromMap(response.data);
     return imgResponse;
@@ -164,9 +162,7 @@ class ShineyHTTPClient {
 
   Future<MangSearch> getMangaSearch(String item, int page) async {
     MangSearch search = new MangSearch();
-    Map<String, dynamic> map = Map();
     String url = SEARCH_URL + "?title=" + item + "&page=" + page.toString();
-    print(url);
     Response response = await this._client.get(url);
     Document document = parse(response.data);
 

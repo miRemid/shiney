@@ -1,34 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:shiney/core/client/model.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shiney/core/database/database.dart';
 import 'package:shiney/core/global/global.dart' show client;
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shiney/core/style/size_config.dart';
 
 class MangaView extends StatefulWidget {
-  MangaView({Key key}) : super(key: key);
+  final String url;
+  final String next;
+  final String prev;
+  MangaView({
+    Key key,
+    @required this.url,
+    @required this.next,
+    @required this.prev,
+  }) : super(key: key);
 
   @override
-  _MangaView createState() => _MangaView();
+  _MangaView createState() => _MangaView(url: url, next: next, prev: prev);
 }
 
 class _MangaView extends State<MangaView> {
+  final String url;
+  final String next;
+  final String prev;
+  _MangaView({
+    @required this.url,
+    @required this.next,
+    @required this.prev,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: HomeContent(),
+      body: HomeContent(url: url),
       backgroundColor: Colors.black,
     );
   }
 }
 
-class HomeContent extends StatelessWidget{
+class HomeContent extends StatelessWidget {
+  final String url;
 
-  Future<List<Widget>> _getUrls() async {
-    ImgResponse res = await client.testResponse('url');
-    var tmp = res.data.map((e){
-      return Image.network(e);
-    });
-    return tmp.toList();
+  HomeContent({Key key, @required this.url});
+
+  Future<List<Widget>> _getUrls(String href) async {
+    // 1. check database
+    List<Widget> widgets = new List();
+    List<ImageItem> list = await DBProvider.db.getImages(href);
+    if (list.isEmpty) {
+      ImgResponse res = await client.getChapterImages(href);
+      res.data.forEach((element)  {
+        DBProvider.db.insertImage(href, element);
+        widgets.add(CachedNetworkImage(imageUrl: element,fit: BoxFit.fitWidth,));
+      });
+    } else {
+      list.forEach((element) {
+        widgets.add(CachedNetworkImage(imageUrl: element.url));
+      });
+    }
+    return widgets;
   }
 
   Widget _buildFuture(BuildContext context, AsyncSnapshot snapshot) {
@@ -49,18 +81,19 @@ class HomeContent extends StatelessWidget{
     }
   }
 
-  Widget _createListView(BuildContext context, AsyncSnapshot snapshot){
+  Widget _createListView(BuildContext context, AsyncSnapshot snapshot) {
     //数据处理
-
     var data = snapshot.data;
-    List<Image> listData = (data as List).cast();
-    return ListView.builder(
-      shrinkWrap: true,
-      // physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        return listData[index];
-      },
-      itemCount: listData.length,
+    List<Widget> listData = (data as List).cast();
+    return CarouselSlider(
+        items: listData,
+        options: CarouselOptions(
+          autoPlay: false,
+          height: SizeConfig.screenHeight,
+          enlargeCenterPage: false,
+          viewportFraction: 1,
+          initialPage: 0,
+        )
     );
   }
 
@@ -68,7 +101,7 @@ class HomeContent extends StatelessWidget{
   Widget build(BuildContext context) {
     // TODO: implement build
     return FutureBuilder(
-      future: this._getUrls(),
+      future: this._getUrls(url),
       builder: this._buildFuture,
     );
   }
